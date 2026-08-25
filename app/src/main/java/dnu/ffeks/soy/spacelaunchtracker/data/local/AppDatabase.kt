@@ -1,0 +1,34 @@
+package dnu.ffeks.soy.spacelaunchtracker.data.local
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import dnu.ffeks.soy.spacelaunchtracker.data.network.SpaceLaunch
+
+@Database(entities = [SpaceLaunch::class], version = 1, exportSchema = false)
+@TypeConverters(LaunchTypeConverters::class)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun spaceLaunchDao(): SpaceLaunchDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "space_launch_database"
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
